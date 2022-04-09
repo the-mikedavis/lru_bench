@@ -19,7 +19,8 @@ defmodule LruBench.MixProject do
 
   defp deps do
     [
-      {:benchee, "~> 1.1"}
+      {:benchee, "~> 1.1"},
+      {:lru, "~> 2.4"}
     ]
   end
 end
