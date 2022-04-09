@@ -1,7 +1,6 @@
 capacity = 100
 :gen_server_lru.start_link(capacity: capacity)
 :ets_lru.start_link(capacity: capacity)
-:ets_lru2.start_link(capacity: capacity)
 {:ok, lru} = :lru.start(max_objs: capacity)
 
 variance = 1..250
@@ -19,12 +18,6 @@ Benchee.run(
        Enum.each(input, fn element ->
          :ok = :ets_lru.put(element, element)
          ^element = :ets_lru.get(element, :error)
-       end)
-     end,
-    "ets_lru2" => fn input ->
-       Enum.each(input, fn element ->
-         :ok = :ets_lru2.put(element, element)
-         ^element = :ets_lru2.get(element, :error)
        end)
      end,
     "lru" => fn input ->
