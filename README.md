@@ -2,6 +2,11 @@
 
 A benchmark comparison of some LRU cache approaches in Erlang
 
+The caches are implemented in `src/` and a benchmarking script in `bench.exs`
+runs the Benchee benchmarks.
+
+<details><summary>The benchmark results...</summary>
+
 ```
 Operating System: Linux
 CPU Information: Intel(R) Core(TM) i7-9700KF CPU @ 3.60GHz
@@ -115,3 +120,10 @@ lru                   56.45 MB - 0.80x memory usage -13.73599 MB
 
 **All measurements for memory usage were the same**
 ```
+
+</details>
+
+### Licence
+
+This work is licensed under the BSD 0-Clause License. See the `LICENSE` file
+for more information.
