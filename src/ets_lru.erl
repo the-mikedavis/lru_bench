@@ -77,8 +77,7 @@ handle_call({get, Key, Default}, _From, State) ->
             % Increment the access ID for the entry
             NextId = State#state.id + 1,
             [{Key, Value}] = ets:lookup(State#state.keys_to_values, Key),
-            _ = ets:delete(State#state.keys_to_ids, Key),
-            _ = ets:insert(State#state.keys_to_ids, {Key, NextId}),
+            _ = ets:update_element(State#state.keys_to_ids, Key, {2, NextId}),
             _ = ets:delete(State#state.ids_to_keys, CurrentId),
             _ = ets:insert(State#state.ids_to_keys, {NextId, Key}),
             {reply, Value, State#state{id = NextId}}
