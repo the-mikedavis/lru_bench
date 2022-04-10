@@ -5,7 +5,14 @@ A benchmark comparison of some LRU cache approaches in Erlang
 The caches are implemented in `src/` and a benchmarking script in `bench.exs`
 runs the Benchee benchmarks.
 
-<details><summary>The benchmark results...</summary>
+### Results
+
+Note: the "inputs" are used to control the capacity of the cache.
+
+* Small - 10
+* Medium - 100
+* Large - 1,000
+* X-Large - 10,000
 
 ```
 Operating System: Linux
@@ -18,110 +25,60 @@ Erlang 24.2
 Benchmark suite executing with the following configuration:
 warmup: 2 s
 time: 10 s
-memory time: 2 s
+memory time: 0 ns
 reduction time: 0 ns
 parallel: 1
-inputs: Large, Medium, Small, X-Large
-Estimated total run time: 2.80 min
-
-Benchmarking ets_lru with input Large ...
-Benchmarking ets_lru with input Medium ...
-Benchmarking ets_lru with input Small ...
-Benchmarking ets_lru with input X-Large ...
-Benchmarking gen_server_lru with input Large ...
-Benchmarking gen_server_lru with input Medium ...
-Benchmarking gen_server_lru with input Small ...
-Benchmarking gen_server_lru with input X-Large ...
-Benchmarking lru with input Large ...
-Benchmarking lru with input Medium ...
-Benchmarking lru with input Small ...
-Benchmarking lru with input X-Large ...
-
-##### With input Large #####
-Name                     ips        average  deviation         median         99th %
-ets_lru                28.60       34.97 ms     ±1.66%       34.75 ms       37.28 ms
-gen_server_lru         27.25       36.70 ms     ±1.23%       36.56 ms       38.34 ms
-lru                    23.76       42.09 ms     ±1.13%       41.97 ms       43.64 ms
-
-Comparison: 
-ets_lru                28.60
-gen_server_lru         27.25 - 1.05x slower +1.73 ms
-lru                    23.76 - 1.20x slower +7.12 ms
-
-Memory usage statistics:
-
-Name              Memory usage
-ets_lru                7.01 MB
-gen_server_lru         7.01 MB - 1.00x memory usage +0 MB
-lru                    5.64 MB - 0.80x memory usage -1.37058 MB
-
-**All measurements for memory usage were the same**
-
-##### With input Medium #####
-Name                     ips        average  deviation         median         99th %
-ets_lru               289.44        3.45 ms     ±2.51%        3.42 ms        3.78 ms
-gen_server_lru        273.22        3.66 ms     ±2.48%        3.63 ms        4.04 ms
-lru                   237.54        4.21 ms     ±2.44%        4.17 ms        4.64 ms
-
-Comparison: 
-ets_lru               289.44
-gen_server_lru        273.22 - 1.06x slower +0.21 ms
-lru                   237.54 - 1.22x slower +0.75 ms
-
-Memory usage statistics:
-
-Name              Memory usage
-ets_lru              718.23 KB
-gen_server_lru       718.23 KB - 1.00x memory usage +0 KB
-lru                  576.69 KB - 0.80x memory usage -141.54688 KB
-
-**All measurements for memory usage were the same**
+inputs: Small, Medium, Large, X-Large
+Estimated total run time: 2.40 min
 
 ##### With input Small #####
 Name                     ips        average  deviation         median         99th %
-ets_lru               3.29 K      304.28 μs     ±5.05%      300.17 μs      378.08 μs
-lru                   3.26 K      306.54 μs     ±5.01%      302.37 μs      379.54 μs
-gen_server_lru        3.19 K      313.90 μs     ±4.60%      310.12 μs      368.25 μs
+lru                 308.87 K        3.24 μs   ±509.14%        3.07 μs        4.47 μs
+gen_server_lru      256.49 K        3.90 μs   ±430.37%        3.65 μs        5.20 μs
+ets_lru             244.56 K        4.09 μs   ±414.46%        3.95 μs        5.27 μs
 
 Comparison: 
-ets_lru               3.29 K
-lru                   3.26 K - 1.01x slower +2.27 μs
-gen_server_lru        3.19 K - 1.03x slower +9.63 μs
+lru                 308.87 K
+gen_server_lru      256.49 K - 1.20x slower +0.66 μs
+ets_lru             244.56 K - 1.26x slower +0.85 μs
 
-Memory usage statistics:
-
-Name                   average  deviation         median         99th %
-ets_lru               71.49 KB     ±0.00%       71.49 KB       71.49 KB
-lru                   57.83 KB     ±0.11%       57.84 KB       57.84 KB
-gen_server_lru        71.49 KB     ±0.01%       71.49 KB       71.49 KB
+##### With input Medium #####
+Name                     ips        average  deviation         median         99th %
+ets_lru             240.28 K        4.16 μs   ±411.54%        4.02 μs        5.40 μs
+gen_server_lru      226.69 K        4.41 μs   ±287.84%        3.97 μs       10.08 μs
+lru                 189.98 K        5.26 μs   ±175.70%        5.08 μs        9.47 μs
 
 Comparison: 
-ets_lru               71.49 KB
-lru                   57.83 KB - 0.81x memory usage -13.66389 KB
-gen_server_lru        71.49 KB - 1.00x memory usage -0.00029 KB
+ets_lru             240.28 K
+gen_server_lru      226.69 K - 1.06x slower +0.25 μs
+lru                 189.98 K - 1.26x slower +1.10 μs
+
+##### With input Large #####
+Name                     ips        average  deviation         median         99th %
+ets_lru             234.08 K        4.27 μs   ±291.66%        4.13 μs        5.58 μs
+gen_server_lru      204.78 K        4.88 μs   ±276.01%        4.20 μs       16.07 μs
+lru                  45.23 K       22.11 μs    ±42.53%       23.17 μs       41.03 μs
+
+Comparison: 
+ets_lru             234.08 K
+gen_server_lru      204.78 K - 1.14x slower +0.61 μs
+lru                  45.23 K - 5.18x slower +17.84 μs
 
 ##### With input X-Large #####
 Name                     ips        average  deviation         median         99th %
-ets_lru                 2.83      352.97 ms     ±0.50%      353.18 ms      358.07 ms
-gen_server_lru          2.67      374.37 ms     ±1.65%      371.84 ms      389.06 ms
-lru                     2.40      416.95 ms     ±0.54%      416.40 ms      423.77 ms
+ets_lru             226.97 K        4.41 μs   ±294.63%        4.24 μs        5.74 μs
+gen_server_lru      191.14 K        5.23 μs   ±308.39%        4.56 μs       17.23 μs
+lru                   4.92 K      203.30 μs    ±40.13%      225.03 μs      296.74 μs
 
 Comparison: 
-ets_lru                 2.83
-gen_server_lru          2.67 - 1.06x slower +21.41 ms
-lru                     2.40 - 1.18x slower +63.98 ms
-
-Memory usage statistics:
-
-Name              Memory usage
-ets_lru               70.19 MB
-gen_server_lru        70.19 MB - 1.00x memory usage +0 MB
-lru                   56.45 MB - 0.80x memory usage -13.73599 MB
-
-**All measurements for memory usage were the same**
+ets_lru             226.97 K
+gen_server_lru      191.14 K - 1.19x slower +0.83 μs
+lru                   4.92 K - 46.14x slower +198.89 μs
 ```
 
-</details>
+### Analysis
+
+TODO
 
 ### Licence
 
