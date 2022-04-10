@@ -76,9 +76,83 @@ gen_server_lru      191.14 K - 1.19x slower +0.83 μs
 lru                   4.92 K - 46.14x slower +198.89 μs
 ```
 
-### Analysis
+### Limitations
 
-TODO
+Benchee does not track memory usage outside of the runner process, which
+disallows us from measuring meaningful memory metrics.
+
+### Background
+
+The `lru` case uses the popular `lru` package on hex
+([source](https://gitlab.com/barrel-db/erlang-lru/-/tree/master)). This
+implementation does not use `ets` at all: instead elements are stored in
+a map and the expiration values are stored in a list.
+
+### Discussion
+
+With a very small cache, `lru` outperforms the custom implementations here.
+`lru`'s performance degrades as `Capacity` is increased though. This can
+be explained by `lru`'s use of a list for the tracking of expriation data.
+For example, take a common case where the LRU is full and a new element is
+inserted: the least-recently used element in the cache must be evicted.
+`lru`'s implementation looks somewhat like so:
+
+```erl
+remove_oldest(Cache) ->
+  Last = lists:last(Cache#cache.evict_list),
+  Cache#cache{evict_list=lists:droplast(Cache#cache.evict_list),
+              items=maps:remove(Last, Cache#cache.items)}.
+```
+
+The `lists:last/1` and `lists:droplast/1` are linear on the length of the
+list, and the length of the list is `Capacity` when the cache is full.
+
+In the implementations here, though, we use `ets:first/1`
+
+```erl
+OldestId = ets:first(State#state.ids_to_keys),
+[{OldestId, OldestKey}] = ets:lookup(State#state.ids_to_keys, OldestId),
+_ = ets:delete(State#state.ids_to_keys, OldestId),
+_ = ets:delete(State#state.keys_to_ids, OldestKey),
+_ = ets:delete(State#state.keys_to_values, OldestKey),
+```
+
+The `State#state.ids_to_keys` ets table is an `ordered_set`, so lookup,
+insertion, and deletion, and determining `ets:first/1` in the set are
+logarithmic on the size of the set, and the set has `Capacity` elements
+when the cache is full.
+
+A similar situation occurs when getting an element from the cache. In
+all implementations, lookup of the value for a given key is very fast:
+either an `ets:lookup/2` in a `set` or a `maps:get/2`. For the sake
+of argument, let's call those lookups roughly constant-time. The expensive
+part of getting an element from an LRU cache is updating the metadata
+that tracks which keys have been least-recently used. In `lru`, this
+is straightforward with a list:
+
+```erl
+move_front(List, Key) ->
+  [Key | lists:delete(Key, List)].
+```
+
+In the ets-based implementations though, we update the "ID" (a
+incrementing integer which identifies the order in which keys were
+inserted and accessed):
+
+```erl
+_ = ets:update_element(State#state.keys_to_ids, Key, {2, NextId}),
+_ = ets:delete(State#state.ids_to_keys, CurrentId),
+_ = ets:insert(State#state.ids_to_keys, {NextId, Key}),
+```
+
+For the `State#state.keys_to_ids` table which is a `set`, we can say that the
+update is roughly constant-time. The `State#state.ids_to_keys` `ordered_set`
+table has a logarithmic update time which dominates the other update. This
+logarithmic update time scales better than the linear `move_front/2`
+implementation.
+
+So we see that the ets-based implementations here are logarithmic for both
+`put/2` and `get/2`, while the `lru` implementation is linear.
 
 ### Licence
 
