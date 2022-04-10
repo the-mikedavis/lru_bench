@@ -3,13 +3,29 @@ random_element = fn capacity ->
   Enum.random(1..max)
 end
 
+elements = fn capacity ->
+  Stream.repeatedly(fn -> random_element.(capacity) end)
+  |> Enum.take(capacity)
+end
+
 Benchee.run(
   %{
-    "gen_server_lru" => {
+    "gen_server_lru get" => {
+      fn {capacity, _pid} ->
+        element = random_element.(capacity)
+        :gen_server_lru.get(element, :error)
+      end,
+      before_scenario: fn capacity ->
+        {:ok, pid} = :gen_server_lru.start_link(capacity: capacity)
+        Enum.each(elements.(capacity), &:gen_server_lru.put(&1, &1))
+        {capacity, pid}
+      end,
+      after_scenario: fn {_capacity, pid} -> GenServer.stop(pid) end
+    },
+    "gen_server_lru put" => {
       fn {capacity, _pid} ->
         element = random_element.(capacity)
         :gen_server_lru.put(element, element)
-        ^element = :gen_server_lru.get(element, :error)
       end,
       before_scenario: fn capacity ->
         {:ok, pid} = :gen_server_lru.start_link(capacity: capacity)
@@ -17,23 +33,22 @@ Benchee.run(
       end,
       after_scenario: fn {_capacity, pid} -> GenServer.stop(pid) end
     },
-    "ets_lru" => {
-      fn {capacity, _pid} ->
+    "lru get" => {
+      fn {capacity, lru} ->
         element = random_element.(capacity)
-        :ets_lru.put(element, element)
-        ^element = :ets_lru.get(element, :error)
+        :lru.get(lru, element, :error)
       end,
       before_scenario: fn capacity ->
-        {:ok, pid} = :ets_lru.start_link(capacity: capacity)
+        {:ok, pid} = :lru.start(max_objs: capacity)
+        Enum.each(elements.(capacity), &:lru.add(pid, &1, &1))
         {capacity, pid}
       end,
       after_scenario: fn {_capacity, pid} -> GenServer.stop(pid) end
     },
-    "lru" => {
+    "lru put" => {
       fn {capacity, lru} ->
         element = random_element.(capacity)
         :lru.add(lru, element, element)
-        ^element = :lru.get(lru, element, :error)
       end,
       before_scenario: fn capacity ->
         {:ok, pid} = :lru.start(max_objs: capacity)

@@ -1,7 +1,6 @@
 %% @doc A Least-Recently Used (LRU) cache server
 %%
-%% This one is implemented as a gen_server which uses `ets' for a lookup
-%% between member IDs and keys.
+%% This one is implemented as a gen_server which uses `ets' for all data.
 -module(gen_server_lru).
 
 -behaviour(gen_server).
@@ -13,8 +12,8 @@
         {id = 0 :: non_neg_integer(),
          capacity :: pos_integer(),
          cardinality = 0 :: non_neg_integer(),
-         keys_to_values = #{} :: map(),
-         keys_to_ids = #{} :: map(),
+         keys_to_values :: ets:t(),
+         keys_to_ids :: ets:t(),
          ids_to_keys :: ets:t()}).
 
 -spec get(Key :: term(), Default :: term()) -> Value :: term().
@@ -61,34 +60,38 @@ init(Opts) ->
             ignore;
         _ ->
             IdsToKeys = ets:new(gen_server_lru_ids_to_keys, [ordered_set, private]),
-            {ok, #state{capacity = Capacity, ids_to_keys = IdsToKeys}}
+            KeysToIds = ets:new(gen_server_lru_keys_to_ids, [set, private]),
+            KeysToValues = ets:new(gen_server_lru_keys_to_values, [set, private]),
+            {ok, #state{capacity = Capacity,
+                        ids_to_keys = IdsToKeys,
+                        keys_to_ids = KeysToIds,
+                        keys_to_values = KeysToValues}}
     end.
 
 %% @private
 handle_call({get, Key, Default}, _From, State) ->
-    case maps:get(Key, State#state.keys_to_values, undefined) of
-        undefined ->
+    case ets:lookup(State#state.keys_to_ids, Key) of
+        [] ->
             {reply, Default, State};
-        Value ->
+        [{Key, CurrentId}] ->
             % Increment the access ID for the entry
             NextId = State#state.id + 1,
-            {CurrentId, KeysToIds} = maps:take(Key, State#state.keys_to_ids),
-            KeysToIds1 = maps:put(Key, NextId, KeysToIds),
+            [{Key, Value}] = ets:lookup(State#state.keys_to_values, Key),
+            _ = ets:update_element(State#state.keys_to_ids, Key, {2, NextId}),
             _ = ets:delete(State#state.ids_to_keys, CurrentId),
             _ = ets:insert(State#state.ids_to_keys, {NextId, Key}),
-            State1 = State#state{keys_to_ids = KeysToIds1, id = NextId},
-            {reply, Value, State1}
+            {reply, Value, State#state{id = NextId}}
     end;
 handle_call({put, Key, Value}, _From, State) ->
-    case maps:get(Key, State#state.keys_to_values, undefined) of
-        undefined ->
+    case ets:lookup(State#state.keys_to_values, Key) of
+        [] ->
             State1 = insert_key(State, Key, Value),
             {reply, ok, State1};
-        Value ->
+        [{Key, Value}] ->
             {reply, ok, State};
-        _OtherValue ->
-            KeysToValues = maps:put(Key, Value, State#state.keys_to_values),
-            {reply, ok, State#state{keys_to_values = KeysToValues}}
+        [_OtherValue] ->
+            ets:insert(State#state.keys_to_values, {Key, Value}),
+            {reply, ok, State}
     end.
 
 insert_key(#state{capacity = Capacity} = State, Key, Value) ->
@@ -100,24 +103,20 @@ insert_key(#state{capacity = Capacity} = State, Key, Value) ->
             Capacity ->
                 OldestId = ets:first(State#state.ids_to_keys),
                 [{OldestId, OldestKey}] = ets:lookup(State#state.ids_to_keys, OldestId),
-                ets:delete(State#state.ids_to_keys, OldestId),
-                KeysToIds = maps:remove(OldestKey, State#state.keys_to_ids),
-                KeysToValues = maps:remove(OldestKey, State#state.keys_to_values),
-                State#state{cardinality = State#state.cardinality - 1,
-                            keys_to_ids = KeysToIds,
-                            keys_to_values = KeysToValues};
+                _ = ets:delete(State#state.ids_to_keys, OldestId),
+                _ = ets:delete(State#state.keys_to_ids, OldestKey),
+                _ = ets:delete(State#state.keys_to_values, OldestKey),
+                State#state{cardinality = State#state.cardinality - 1};
             _ ->
                 State
         end,
     %% Insert the new element into the cache.
     NextId = State1#state.id + 1,
     _ = ets:insert(State#state.ids_to_keys, {NextId, Key}),
-    KeysToIds1 = maps:put(Key, NextId, State1#state.keys_to_ids),
-    KeysToValues1 = maps:put(Key, Value, State1#state.keys_to_values),
+    _ = ets:insert(State#state.keys_to_ids, {Key, NextId}),
+    _ = ets:insert(State#state.keys_to_values, {Key, Value}),
     State1#state{id = NextId,
-                 cardinality = State1#state.cardinality + 1,
-                 keys_to_ids = KeysToIds1,
-                 keys_to_values = KeysToValues1}.
+                 cardinality = State1#state.cardinality + 1}.
 
 %% @private
 handle_cast(_Msg, State) ->
