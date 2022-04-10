@@ -152,7 +152,8 @@ logarithmic update time scales better than the linear `move_front/2`
 implementation.
 
 So we see that the ets-based implementations here are logarithmic for both
-`put/2` and `get/2`, while the `lru` implementation is linear.
+`put/2` and `get/2`, while the `lru` implementation is linear on the
+`Capacity` of the cache.
 
 ### Licence
 
