@@ -140,7 +140,7 @@ a map and the expiration values are stored in a list.
 
 ### Discussion
 
-With a very small cache, `lru` outperforms the custom implementations here.
+With a very small cache, `lru` outperforms the implementation here.
 `lru`'s performance degrades as `Capacity` is increased though. This can
 be explained by `lru`'s use of a list for the tracking of expriation data.
 For example, take a common case where the LRU is full and a new element is
@@ -157,7 +157,7 @@ remove_oldest(Cache) ->
 The `lists:last/1` and `lists:droplast/1` are linear on the length of the
 list, and the length of the list is `Capacity` when the cache is full.
 
-In the implementations here, though, we use `ets:first/1`
+In the implementation here, though, we use `ets:first/1`
 
 ```erl
 OldestId = ets:first(State#state.ids_to_keys),
@@ -185,7 +185,7 @@ move_front(List, Key) ->
   [Key | lists:delete(Key, List)].
 ```
 
-In the ets-based implementations though, we update the "ID" (a
+In the ets-based implementation though, we update the "ID" (a
 incrementing integer which identifies the order in which keys were
 inserted and accessed):
 
@@ -201,7 +201,7 @@ table has a logarithmic update time which dominates the other update. This
 logarithmic update time scales better than the linear `move_front/2`
 implementation.
 
-So we see that the ets-based implementations here are logarithmic for both
+So we see that the ets-based implementation here is logarithmic for both
 `put/2` and `get/2`, while the `lru` implementation is linear on the
 `Capacity` of the cache.
 
