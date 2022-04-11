@@ -6,16 +6,15 @@
 -export([get/2, put/2, init/1, clear/0]).
 
 -define(CACHE, '$__ETS_LRU_CACHE__').
-%% In Erlang term ordering, a 1-arity tuple is `>' than all integers.
--define(INT_INFINITY, {1}).
+-define(RANKS, '$__ETS_LRU_RANKS__').
 
 -spec get(Key :: term(), Default :: term()) -> Value :: term().
 %% @doc Gets the value in the cache, giving Default if not found
 
 get(Key, Default) ->
     case ets:lookup(?CACHE, Key) of
-        [{Key, _Rank, Value}] ->
-            _ = ets:update_element(?CACHE, Key, {2, next_rank()}),
+        [{Key, Rank, Value}] ->
+            update_rank(Rank, Key),
             Value;
         [] ->
             Default
@@ -28,8 +27,8 @@ put(Key, Value) ->
     case ets:lookup(?CACHE, Key) of
         [{Key, _Rank, Value}] ->
             ok;
-        [{Key, _Rank, _OtherValue}] ->
-            _ = ets:update_element(?CACHE, Key, [{2, next_rank()}, {3, Value}]),
+        [{Key, Rank, _OtherValue}] ->
+            update_rank(Rank, Key),
             ok;
         [] ->
             insert_key(Key, Value),
@@ -38,31 +37,38 @@ put(Key, Value) ->
 
 init(Capacity) ->
     _ = application:set_env(ets_lru, capacity, Capacity),
-    _ = ets:new(?CACHE, [public, set, named_table]),
+    _ = ets:new(?CACHE, [public, named_table, set]),
+    _ = ets:new(?RANKS, [public, ordered_set, named_table]),
     ok.
 
 clear() ->
     ets:delete(?CACHE),
+    ets:delete(?RANKS),
+    ok.
+
+update_rank(Rank, Key) ->
+    NextRank = next_rank(),
+    _ = ets:delete(?RANKS, Rank),
+    _ = ets:insert(?RANKS, {NextRank, Key}),
+    _ = ets:update_element(?CACHE, Key, {2, NextRank}),
     ok.
 
 insert_key(Key, Value) ->
-    %% Ensure the cache has capacity. If the cache has reached capacity,
-    %% discard the least recently used element. The `?IDS_TO_KEYS' table
-    %% is an ordered set, so the insert is logarithmic in time.
     case ets:info(?CACHE, size) >= capacity() of
         true ->
             %% The cache is full so we must discard the least recently used
             %% item.
-            {OldestKey, _Rank, _Value} =
-                ets:foldl(fun({_Key, Rank, _Value} = Element, Acc) when Rank < Acc -> Element;
-                             (_Element, Acc)                                       -> Acc
-                          end, ?INT_INFINITY, ?CACHE),
+            OldestRank = ets:first(?RANKS),
+            [{OldestRank, OldestKey}] = ets:take(?RANKS, OldestRank),
             ets:delete(?CACHE, OldestKey);
         _ ->
             ok
     end,
     %% Insert the new element into the cache.
-    ets:insert(?CACHE, {Key, next_rank(), Value}).
+    NextRank = next_rank(),
+    ets:insert(?CACHE, {Key, NextRank, Value}),
+    ets:insert(?RANKS, {NextRank, Key}),
+    ok.
 
 capacity() ->
     application:get_env(ets_lru, capacity, 10_000).
