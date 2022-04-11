@@ -110,13 +110,37 @@ defmodule LruBench do
     }
   end
 
+  def persistent_term_get do
+    {
+      fn capacity ->
+        element = random_element(capacity)
+        :persistent_term.get({__MODULE__, element}, :undefined)
+      end,
+      before_scenario: fn capacity ->
+        capacity
+        |> random_elements()
+        |> Enum.each(&:persistent_term.put({__MODULE__, &1}, &1))
+
+        capacity
+      end
+    }
+  end
+
+  def persistent_term_put do
+    fn capacity ->
+      element = random_element(capacity)
+      :persistent_term.put({__MODULE__, element}, element)
+    end
+  end
+
   def settings do
     [
       inputs: [
         {"Small", 10},
         {"Medium", 100},
         {"Large", 1_000},
-        {"X-Large", 10_000}
+        {"X-Large", 10_000},
+        {"XX-Large", 100_000}
       ],
       time: 10
     ]
@@ -127,7 +151,8 @@ defmodule LruBench do
       %{
         "gen_server_lru get" => gen_server_lru_get(),
         "ets_lru get" => ets_lru_get(),
-        "lru get" => lru_get()
+        "lru get" => lru_get(),
+        "persistent_term get" => persistent_term_get()
       },
       settings()
     )
@@ -138,7 +163,8 @@ defmodule LruBench do
       %{
         "gen_server_lru put" => gen_server_lru_put(),
         "ets_lru put" => ets_lru_put(),
-        "lru put" => lru_put()
+        "lru put" => lru_put(),
+        "persistent_term put" => persistent_term_put()
       },
       settings()
     )
