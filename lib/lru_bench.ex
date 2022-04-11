@@ -44,6 +44,39 @@ defmodule LruBench do
     }
   end
 
+  def ets_lru_get do
+    {
+      fn capacity ->
+        element = random_element(capacity)
+        :ets_lru.get(element, :error)
+      end,
+      before_scenario: fn capacity ->
+        :ets_lru.init(capacity)
+
+        capacity
+        |> random_elements()
+        |> Enum.each(&:ets_lru.put(&1, &1))
+
+        capacity
+      end,
+      after_scenario: fn _ -> :ets_lru.clear() end
+    }
+  end
+
+  def ets_lru_put do
+    {
+      fn capacity ->
+        element = random_element(capacity)
+        :ets_lru.put(element, element)
+      end,
+      before_scenario: fn capacity ->
+        :ets_lru.init(capacity)
+        capacity
+      end,
+      after_scenario: fn _ -> :ets_lru.clear() end
+    }
+  end
+
   def lru_get do
     {
       fn {capacity, lru} ->
@@ -79,12 +112,12 @@ defmodule LruBench do
 
   def settings do
     [
-      inputs: %{
-        "Small" => 10,
-        "Medium" => 100,
-        "Large" => 1_000,
-        "X-Large" => 10_000
-      },
+      inputs: [
+        {"Small", 10},
+        {"Medium", 100},
+        {"Large", 1_000},
+        {"X-Large", 10_000},
+      ],
       time: 10
     ]
   end
@@ -93,6 +126,7 @@ defmodule LruBench do
     Benchee.run(
       %{
         "gen_server_lru get" => gen_server_lru_get(),
+        "ets_lru get" => ets_lru_get(),
         "lru get" => lru_get()
       },
       settings()
@@ -103,6 +137,7 @@ defmodule LruBench do
     Benchee.run(
       %{
         "gen_server_lru put" => gen_server_lru_put(),
+        "ets_lru put" => ets_lru_put(),
         "lru put" => lru_put()
       },
       settings()
