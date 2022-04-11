@@ -157,7 +157,7 @@ a map and the expiration values are stored in a list.
 
 ### Discussion
 
-With a very small cache, `lru` outperforms the implementation here.
+With a very small cache, `lru` outperforms the gen_server implementation here.
 `lru`'s performance degrades as `Capacity` is increased though. This can
 be explained by `lru`'s use of a list for the tracking of expriation data.
 For example, take a common case where the LRU is full and a new element is
@@ -177,14 +177,12 @@ list, and the length of the list is `Capacity` when the cache is full.
 In the implementation here, though, we use `ets:first/1`
 
 ```erl
-OldestRank = ets:first(State#state.ranks_to_keys),
-[{OldestRank, OldestKey}] = ets:lookup(State#state.ranks_to_keys, OldestRank),
-_ = ets:delete(State#state.ranks_to_keys, OldestRank),
-_ = ets:delete(State#state.keys_to_ranks, OldestKey),
-_ = ets:delete(State#state.keys_to_values, OldestKey),
+OldestRank = ets:first(?RANKS),
+[{OldestRank, OldestKey}] = ets:take(?RANKS, OldestRank),
+ets:delete(?CACHE, OldestKey);
 ```
 
-The `State#state.ranks_to_keys` ets table is an `ordered_set`, so lookup,
+The `?RANKS` ets table is an `ordered_set`, so lookup,
 insertion, and deletion, and determining `ets:first/1` in the set are
 logarithmic on the size of the set, and the set has `Capacity` elements
 when the cache is full.
@@ -202,23 +200,26 @@ move_front(List, Key) ->
   [Key | lists:delete(Key, List)].
 ```
 
-In the ets-based implementation though, we update the `Rank` (a
+In the ets-based implementations though, we update the "rank" (a
 incrementing integer which identifies the order in which keys were
 inserted and accessed):
 
 ```erl
-_ = ets:update_element(State#state.keys_to_ranks, Key, {2, NextRank}),
-_ = ets:delete(State#state.ranks_to_keys, CurrentRank),
-_ = ets:insert(State#state.ranks_to_keys, {NextRank, Key}),
+update_rank(Rank, Key) ->
+    NextRank = next_rank(),
+    _ = ets:delete(?RANKS, Rank),
+    _ = ets:insert(?RANKS, {NextRank, Key}),
+    _ = ets:update_element(?CACHE, Key, {2, NextRank}),
+    ok.
 ```
 
-For the `State#state.keys_to_ranks` table which is a `set`, we can say that the
-update is roughly constant-time. The `State#state.ranks_to_keys` `ordered_set`
+For the `?CACHE` table which is a `set`, we can say that the
+update is roughly constant-time. The `?RANKS` `ordered_set`
 table has a logarithmic update time which dominates the other update. This
 logarithmic update time scales better than the linear `move_front/2`
 implementation.
 
-So we see that the ets-based implementation here is logarithmic for both
+So we see that the ets-based implementations here are logarithmic for both
 `put/2` and `get/2`, while the `lru` implementation is linear on the
 `Capacity` of the cache.
 
