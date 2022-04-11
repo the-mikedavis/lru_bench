@@ -116,7 +116,7 @@ defmodule LruBench do
         {"Small", 10},
         {"Medium", 100},
         {"Large", 1_000},
-        {"X-Large", 10_000},
+        {"X-Large", 10_000}
       ],
       time: 10
     ]
