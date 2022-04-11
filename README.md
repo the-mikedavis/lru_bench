@@ -2,8 +2,7 @@
 
 A benchmark comparison of some LRU cache approaches in Erlang
 
-The caches are implemented in `src/` and a benchmarking script in `bench.exs`
-runs the Benchee benchmarks.
+The caches are implemented in `src/`.
 
 ### Results
 
