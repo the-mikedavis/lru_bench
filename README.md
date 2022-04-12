@@ -37,68 +37,68 @@ Estimated total run time: 4 min
 
 ##### With input Small #####
 Name                          ips        average  deviation         median         99th %
-persistent_term get        2.63 M        0.38 μs  ±9078.70%        0.28 μs        0.86 μs
-ets_lru get                2.06 M        0.48 μs  ±5957.45%        0.31 μs        0.79 μs
-lru get                    0.56 M        1.80 μs  ±1038.89%        1.68 μs        2.57 μs
-gen_server_lru get         0.51 M        1.98 μs  ±1032.39%        1.76 μs        2.88 μs
+persistent_term get        2.64 M        0.38 μs  ±8985.31%        0.28 μs        0.87 μs
+ets_lru get                2.26 M        0.44 μs  ±7044.76%        0.28 μs        0.71 μs
+lru get                    0.56 M        1.79 μs  ±1301.61%        1.64 μs        2.57 μs
+gen_server_lru get         0.52 M        1.91 μs   ±906.87%        1.69 μs        2.86 μs
 
 Comparison: 
-persistent_term get        2.63 M
-ets_lru get                2.06 M - 1.28x slower +0.105 μs
-lru get                    0.56 M - 4.74x slower +1.42 μs
-gen_server_lru get         0.51 M - 5.22x slower +1.60 μs
+persistent_term get        2.64 M
+ets_lru get                2.26 M - 1.16x slower +0.0624 μs
+lru get                    0.56 M - 4.73x slower +1.42 μs
+gen_server_lru get         0.52 M - 5.04x slower +1.53 μs
 
 ##### With input Medium #####
 Name                          ips        average  deviation         median         99th %
-persistent_term get        2.69 M        0.37 μs  ±9134.18%        0.28 μs        0.86 μs
-ets_lru get                2.03 M        0.49 μs  ±7545.79%        0.31 μs        0.82 μs
-lru get                    0.53 M        1.89 μs   ±994.46%        1.70 μs        3.20 μs
-gen_server_lru get         0.50 M        2.00 μs  ±1038.34%        1.77 μs        2.95 μs
+persistent_term get        2.66 M        0.38 μs  ±9159.25%        0.28 μs        0.73 μs
+ets_lru get                2.20 M        0.45 μs  ±7103.27%        0.28 μs        0.75 μs
+lru get                    0.53 M        1.88 μs   ±908.91%        1.66 μs        3.13 μs
+gen_server_lru get         0.51 M        1.96 μs   ±922.31%        1.71 μs        3.00 μs
 
 Comparison: 
-persistent_term get        2.69 M
-ets_lru get                2.03 M - 1.32x slower +0.120 μs
-lru get                    0.53 M - 5.08x slower +1.52 μs
-gen_server_lru get         0.50 M - 5.36x slower +1.62 μs
+persistent_term get        2.66 M
+ets_lru get                2.20 M - 1.21x slower +0.0782 μs
+lru get                    0.53 M - 4.99x slower +1.50 μs
+gen_server_lru get         0.51 M - 5.21x slower +1.58 μs
 
 ##### With input Large #####
 Name                          ips        average  deviation         median         99th %
-persistent_term get        2.65 M        0.38 μs  ±9114.09%        0.28 μs        0.87 μs
-ets_lru get                2.00 M        0.50 μs  ±6075.28%        0.32 μs        0.88 μs
-gen_server_lru get         0.49 M        2.02 μs  ±1016.37%        1.78 μs        3.02 μs
-lru get                    0.39 M        2.57 μs   ±557.24%        1.73 μs       10.98 μs
+persistent_term get        2.69 M        0.37 μs  ±9193.19%        0.27 μs        0.86 μs
+ets_lru get                2.12 M        0.47 μs  ±6403.44%        0.30 μs        0.84 μs
+gen_server_lru get         0.51 M        1.97 μs   ±925.37%        1.71 μs        3.07 μs
+lru get                    0.38 M        2.61 μs   ±716.17%        1.69 μs       11.39 μs
 
 Comparison: 
-persistent_term get        2.65 M
-ets_lru get                2.00 M - 1.33x slower +0.124 μs
-gen_server_lru get         0.49 M - 5.37x slower +1.65 μs
-lru get                    0.39 M - 6.83x slower +2.20 μs
+persistent_term get        2.69 M
+ets_lru get                2.12 M - 1.27x slower +0.0990 μs
+gen_server_lru get         0.51 M - 5.30x slower +1.60 μs
+lru get                    0.38 M - 7.00x slower +2.23 μs
 
 ##### With input X-Large #####
 Name                          ips        average  deviation         median         99th %
-persistent_term get        2.65 M        0.38 μs  ±8999.44%        0.28 μs        0.85 μs
-ets_lru get                1.88 M        0.53 μs  ±6405.08%        0.33 μs        1.04 μs
-gen_server_lru get         0.48 M        2.07 μs  ±1018.43%        1.80 μs        3.17 μs
-lru get                   0.101 M        9.91 μs   ±238.65%        1.77 μs       95.55 μs
+persistent_term get        2.61 M        0.38 μs  ±9059.27%        0.28 μs        0.86 μs
+ets_lru get                1.95 M        0.51 μs  ±6475.90%        0.31 μs        1.09 μs
+gen_server_lru get         0.49 M        2.05 μs   ±863.86%        1.73 μs        3.37 μs
+lru get                  0.0983 M       10.17 μs   ±238.50%        1.72 μs       98.76 μs
 
 Comparison: 
-persistent_term get        2.65 M
-ets_lru get                1.88 M - 1.41x slower +0.156 μs
-gen_server_lru get         0.48 M - 5.49x slower +1.69 μs
-lru get                   0.101 M - 26.23x slower +9.53 μs
+persistent_term get        2.61 M
+ets_lru get                1.95 M - 1.34x slower +0.130 μs
+gen_server_lru get         0.49 M - 5.34x slower +1.66 μs
+lru get                  0.0983 M - 26.54x slower +9.79 μs
 
 ##### With input XX-Large #####
 Name                          ips        average  deviation         median         99th %
-persistent_term get        2.24 M        0.45 μs  ±7999.65%        0.33 μs        0.94 μs
-ets_lru get                1.52 M        0.66 μs  ±4063.58%        0.39 μs        1.62 μs
-gen_server_lru get         0.45 M        2.23 μs   ±964.52%        1.87 μs        3.66 μs
-lru get                  0.0109 M       91.73 μs   ±273.68%        2.03 μs     1115.39 μs
+persistent_term get        2.22 M        0.45 μs  ±7920.59%        0.33 μs        0.92 μs
+ets_lru get                1.47 M        0.68 μs  ±4887.24%        0.41 μs        1.72 μs
+gen_server_lru get         0.45 M        2.23 μs   ±842.16%        1.84 μs        3.92 μs
+lru get                  0.0105 M       94.90 μs   ±273.15%        1.98 μs     1149.43 μs
 
 Comparison: 
-persistent_term get        2.24 M
-ets_lru get                1.52 M - 1.47x slower +0.21 μs
-gen_server_lru get         0.45 M - 4.99x slower +1.78 μs
-lru get                  0.0109 M - 205.30x slower +91.29 μs
+persistent_term get        2.22 M
+ets_lru get                1.47 M - 1.51x slower +0.23 μs
+gen_server_lru get         0.45 M - 4.95x slower +1.78 μs
+lru get                  0.0105 M - 210.71x slower +94.45 μs
 ```
 
 ##### Put
@@ -122,68 +122,68 @@ Estimated total run time: 4 min
 
 ##### With input Small #####
 Name                          ips        average  deviation         median         99th %
-persistent_term put     1835.63 K        0.54 μs  ±6130.51%        0.36 μs        0.62 μs
-ets_lru put              942.64 K        1.06 μs  ±2564.19%        1.09 μs        1.54 μs
-lru put                  476.88 K        2.10 μs   ±941.44%        1.95 μs        3.32 μs
-gen_server_lru put       396.20 K        2.52 μs   ±632.55%        2.48 μs        3.90 μs
+persistent_term put        1.81 M        0.55 μs  ±6172.41%        0.37 μs        0.62 μs
+ets_lru put                1.34 M        0.75 μs  ±3816.46%        0.71 μs        0.99 μs
+lru put                    0.46 M        2.15 μs   ±975.05%        1.97 μs        3.49 μs
+gen_server_lru put         0.42 M        2.37 μs   ±596.54%        2.35 μs        3.26 μs
 
 Comparison: 
-persistent_term put     1835.63 K
-ets_lru put              942.64 K - 1.95x slower +0.52 μs
-lru put                  476.88 K - 3.85x slower +1.55 μs
-gen_server_lru put       396.20 K - 4.63x slower +1.98 μs
+persistent_term put        1.81 M
+ets_lru put                1.34 M - 1.35x slower +0.192 μs
+lru put                    0.46 M - 3.89x slower +1.60 μs
+gen_server_lru put         0.42 M - 4.29x slower +1.82 μs
 
 ##### With input Medium #####
 Name                          ips        average  deviation         median         99th %
-persistent_term put     1835.97 K        0.54 μs  ±6138.86%        0.37 μs        0.64 μs
-ets_lru put              926.23 K        1.08 μs  ±2514.11%        1.12 μs        1.58 μs
-gen_server_lru put       387.02 K        2.58 μs   ±625.88%        2.54 μs        4.04 μs
-lru put                  246.15 K        4.06 μs   ±331.42%        3.94 μs        7.86 μs
+persistent_term put        1.79 M        0.56 μs  ±6190.79%        0.37 μs        0.63 μs
+ets_lru put                1.31 M        0.76 μs  ±4001.57%        0.73 μs        1.02 μs
+gen_server_lru put         0.41 M        2.43 μs   ±589.96%        2.41 μs        3.36 μs
+lru put                    0.24 M        4.24 μs   ±344.13%        4.05 μs        8.42 μs
 
 Comparison: 
-persistent_term put     1835.97 K
-ets_lru put              926.23 K - 1.98x slower +0.53 μs
-gen_server_lru put       387.02 K - 4.74x slower +2.04 μs
-lru put                  246.15 K - 7.46x slower +3.52 μs
+persistent_term put        1.79 M
+ets_lru put                1.31 M - 1.37x slower +0.20 μs
+gen_server_lru put         0.41 M - 4.37x slower +1.88 μs
+lru put                    0.24 M - 7.60x slower +3.68 μs
 
 ##### With input Large #####
 Name                          ips        average  deviation         median         99th %
-persistent_term put     1794.62 K        0.56 μs  ±6023.81%        0.38 μs        0.65 μs
-ets_lru put              898.09 K        1.11 μs  ±1632.55%        1.17 μs        1.62 μs
-gen_server_lru put       377.62 K        2.65 μs   ±616.45%        2.60 μs        4.16 μs
-lru put                   47.71 K       20.96 μs    ±41.12%       22.18 μs       39.40 μs
+persistent_term put        1.76 M        0.57 μs  ±6039.95%        0.38 μs        0.65 μs
+ets_lru put                1.24 M        0.80 μs  ±2746.59%        0.79 μs        1.19 μs
+gen_server_lru put         0.40 M        2.48 μs   ±576.14%        2.47 μs        3.46 μs
+lru put                  0.0464 M       21.57 μs    ±42.21%       22.85 μs       37.46 μs
 
 Comparison: 
-persistent_term put     1794.62 K
-ets_lru put              898.09 K - 2.00x slower +0.56 μs
-gen_server_lru put       377.62 K - 4.75x slower +2.09 μs
-lru put                   47.71 K - 37.61x slower +20.40 μs
+persistent_term put        1.76 M
+ets_lru put                1.24 M - 1.41x slower +0.24 μs
+gen_server_lru put         0.40 M - 4.36x slower +1.91 μs
+lru put                  0.0464 M - 37.92x slower +21.01 μs
 
 ##### With input X-Large #####
 Name                          ips        average  deviation         median         99th %
-persistent_term put     1720.14 K        0.58 μs  ±5864.63%        0.39 μs        0.76 μs
-ets_lru put              885.90 K        1.13 μs  ±1982.63%        1.18 μs        1.53 μs
-gen_server_lru put       374.03 K        2.67 μs   ±617.88%        2.64 μs        3.75 μs
-lru put                    4.89 K      204.63 μs    ±30.42%      219.37 μs      298.21 μs
+persistent_term put        1.69 M        0.59 μs  ±4176.24%        0.40 μs        0.81 μs
+ets_lru put                1.19 M        0.84 μs  ±2308.70%        0.82 μs        1.15 μs
+gen_server_lru put         0.39 M        2.59 μs   ±578.76%        2.56 μs        3.63 μs
+lru put                 0.00479 M      208.79 μs    ±30.56%      224.60 μs      301.90 μs
 
 Comparison: 
-persistent_term put     1720.14 K
-ets_lru put              885.90 K - 1.94x slower +0.55 μs
-gen_server_lru put       374.03 K - 4.60x slower +2.09 μs
-lru put                    4.89 K - 351.99x slower +204.05 μs
+persistent_term put        1.69 M
+ets_lru put                1.19 M - 1.41x slower +0.24 μs
+gen_server_lru put         0.39 M - 4.36x slower +1.99 μs
+lru put                 0.00479 M - 352.05x slower +208.19 μs
 
 ##### With input XX-Large #####
 Name                          ips        average  deviation         median         99th %
-persistent_term put     1411.10 K        0.71 μs  ±3664.18%        0.51 μs        1.02 μs
-ets_lru put              764.51 K        1.31 μs  ±1508.30%        1.33 μs        1.83 μs
-gen_server_lru put       347.04 K        2.88 μs   ±594.07%        2.84 μs        4.09 μs
-lru put                    2.88 K      347.63 μs    ±41.18%      341.88 μs      748.53 μs
+persistent_term put     1374.75 K        0.73 μs  ±3607.47%        0.51 μs        1.04 μs
+ets_lru put              988.72 K        1.01 μs  ±2482.24%        0.96 μs        1.43 μs
+gen_server_lru put       349.47 K        2.86 μs   ±531.04%        2.84 μs        4.07 μs
+lru put                    2.86 K      349.14 μs    ±40.55%      346.82 μs      742.76 μs
 
 Comparison: 
-persistent_term put     1411.10 K
-ets_lru put              764.51 K - 1.85x slower +0.60 μs
-gen_server_lru put       347.04 K - 4.07x slower +2.17 μs
-lru put                    2.88 K - 490.54x slower +346.92 μs
+persistent_term put     1374.75 K
+ets_lru put              988.72 K - 1.39x slower +0.28 μs
+gen_server_lru put       349.47 K - 3.93x slower +2.13 μs
+lru put                    2.86 K - 479.98x slower +348.41 μs
 ```
 
 ### Limitations

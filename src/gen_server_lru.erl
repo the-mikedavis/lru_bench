@@ -5,7 +5,7 @@
 
 -behaviour(gen_server).
 
--export([get/2, put/2, start_link/1, init/1, handle_call/3, handle_cast/2,
+-export([get/3, put/3, start_link/1, init/1, handle_call/3, handle_cast/2,
          handle_info/2]).
 
 -record(state,
@@ -16,17 +16,17 @@
          keys_to_ranks :: ets:t(),
          ranks_to_keys :: ets:t()}).
 
--spec get(Key :: term(), Default :: term()) -> Value :: term().
+-spec get(Cache :: pid(), Key :: term(), Default :: term()) -> Value :: term().
 %% @doc Gets the value in the cache, giving Default if not found
 
-get(Key, Default) ->
-    gen_server:call(?MODULE, {get, Key, Default}).
+get(Cache, Key, Default) ->
+    gen_server:call(Cache, {get, Key, Default}).
 
--spec put(Key :: term(), Value :: term()) -> ok.
+-spec put(Cache :: pid(), Key :: term(), Value :: term()) -> ok.
 %% @doc Puts a value into the cache with a given key
 
-put(Key, Value) ->
-    gen_server:call(?MODULE, {put, Key, Value}).
+put(Cache, Key, Value) ->
+    gen_server:call(Cache, {put, Key, Value}).
 
 %% @doc Starts the LRU gen_server
 %%
@@ -44,7 +44,7 @@ put(Key, Value) ->
 %% application:get_env(gen_server_lru, capacity, 10_000).
 %% '''
 start_link(Opts) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, Opts, []).
+    gen:start(gen_server, link, ?MODULE, Opts, []).
 
 %% @private
 init(Opts) ->

@@ -13,18 +13,18 @@ defmodule LruBench do
 
   def gen_server_lru_get do
     {
-      fn {capacity, _pid} ->
+      fn {capacity, pid} ->
         element = random_element(capacity)
-        :gen_server_lru.get(element, :error)
+        :gen_server_lru.get(pid, element, :error)
       end,
       before_scenario: fn capacity ->
-        {:ok, pid} = :gen_server_lru.start_link(capacity: capacity)
+        {:ok, cache} = :gen_server_lru.start_link(capacity: capacity)
 
         capacity
         |> random_elements()
-        |> Enum.each(&:gen_server_lru.put(&1, &1))
+        |> Enum.each(&:gen_server_lru.put(cache, &1, &1))
 
-        {capacity, pid}
+        {capacity, cache}
       end,
       after_scenario: fn {_capacity, pid} -> GenServer.stop(pid) end
     }
@@ -32,9 +32,9 @@ defmodule LruBench do
 
   def gen_server_lru_put do
     {
-      fn {capacity, _pid} ->
+      fn {capacity, cache} ->
         element = random_element(capacity)
-        :gen_server_lru.put(element, element)
+        :gen_server_lru.put(cache, element, element)
       end,
       before_scenario: fn capacity ->
         {:ok, pid} = :gen_server_lru.start_link(capacity: capacity)
@@ -46,34 +46,35 @@ defmodule LruBench do
 
   def ets_lru_get do
     {
-      fn capacity ->
+      fn {capacity, cache} ->
         element = random_element(capacity)
-        :ets_lru.get(element, :error)
+        :ets_lru.get(cache, element, :error)
       end,
       before_scenario: fn capacity ->
-        :ets_lru.init(capacity)
+        cache = :ets_lru.init(capacity)
 
         capacity
         |> random_elements()
-        |> Enum.each(&:ets_lru.put(&1, &1))
+        |> Enum.each(&:ets_lru.put(cache, &1, &1))
 
-        capacity
+        {capacity, cache}
       end,
-      after_scenario: fn _ -> :ets_lru.clear() end
+      after_scenario: fn {_capacity, cache} ->
+        :ets_lru.clear(cache)
+      end
     }
   end
 
   def ets_lru_put do
     {
-      fn capacity ->
+      fn {capacity, cache} ->
         element = random_element(capacity)
-        :ets_lru.put(element, element)
+        :ets_lru.put(cache, element, element)
       end,
       before_scenario: fn capacity ->
-        :ets_lru.init(capacity)
-        capacity
+        {capacity, :ets_lru.init(capacity)}
       end,
-      after_scenario: fn _ -> :ets_lru.clear() end
+      after_scenario: fn {_capacity, cache} -> :ets_lru.clear(cache) end
     }
   end
 

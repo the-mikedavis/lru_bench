@@ -3,75 +3,77 @@
 %% This one is implemented entirely with ets.
 -module(ets_lru).
 
--export([get/2, put/2, init/1, clear/0]).
+-record(cache, {cache :: ets:t(),
+                ranks :: ets:t(),
+                capacity :: pos_integer()}).
 
--define(CACHE, '$__ETS_LRU_CACHE__').
--define(RANKS, '$__ETS_LRU_RANKS__').
+-export([get/3, put/3, init/1, clear/1]).
 
--spec get(Key :: term(), Default :: term()) -> Value :: term().
+-spec get(Cache :: #cache{}, Key :: term(), Default :: term()) -> Value :: term().
 %% @doc Gets the value in the cache, giving Default if not found
 
-get(Key, Default) ->
-    case ets:lookup(?CACHE, Key) of
+get(Cache, Key, Default) ->
+    case ets:lookup(Cache#cache.cache, Key) of
         [{Key, Rank, Value}] ->
-            update_rank(Rank, Key),
+            update_rank(Cache, Rank, Key),
             Value;
         [] ->
             Default
     end.
 
--spec put(Key :: term(), Value :: term()) -> ok.
+-spec put(Cache :: #cache{}, Key :: term(), Value :: term()) -> ok.
 %% @doc Puts a value into the cache with a given key
 
-put(Key, Value) ->
-    case ets:lookup(?CACHE, Key) of
+put(Cache, Key, Value) ->
+    case ets:lookup(Cache#cache.cache, Key) of
         [{Key, _Rank, Value}] ->
             ok;
         [{Key, Rank, _OtherValue}] ->
-            update_rank(Rank, Key),
+            update_rank(Cache, Rank, Key),
+            ets:update_element(Cache#cache.cache, Key, {3, Value}),
             ok;
         [] ->
-            insert_key(Key, Value),
+            insert_key(Cache, Key, Value),
             ok
     end.
 
+-spec init(Capacity :: pos_integer()) -> #cache{}.
+
 init(Capacity) ->
-    _ = application:set_env(ets_lru, capacity, Capacity),
-    _ = ets:new(?CACHE, [public, named_table, set]),
-    _ = ets:new(?RANKS, [public, ordered_set, named_table]),
+    Cache = ets:new(cache, [public, set]),
+    Ranks = ets:new(ranks, [public, ordered_set]),
+    #cache{cache = Cache, ranks = Ranks, capacity = Capacity}.
+
+-spec clear(Cache :: #cache{}) -> ok.
+
+clear(Cache) ->
+    ets:delete(Cache#cache.cache),
+    ets:delete(Cache#cache.ranks),
     ok.
 
-clear() ->
-    ets:delete(?CACHE),
-    ets:delete(?RANKS),
-    ok.
-
-update_rank(Rank, Key) ->
+update_rank(Cache, Rank, Key) ->
     NextRank = next_rank(),
-    _ = ets:delete(?RANKS, Rank),
-    _ = ets:insert(?RANKS, {NextRank, Key}),
-    _ = ets:update_element(?CACHE, Key, {2, NextRank}),
+    ets:delete(Cache#cache.ranks, Rank),
+    ets:insert(Cache#cache.ranks, {NextRank, Key}),
+    ets:update_element(Cache#cache.cache, Key, {2, NextRank}),
     ok.
 
-insert_key(Key, Value) ->
-    case ets:info(?CACHE, size) >= capacity() of
+insert_key(Cache, Key, Value) ->
+    case ets:info(Cache#cache.cache, size) >= Cache#cache.capacity of
         true ->
             %% The cache is full so we must discard the least recently used
             %% item.
-            OldestRank = ets:first(?RANKS),
-            [{OldestRank, OldestKey}] = ets:take(?RANKS, OldestRank),
-            ets:delete(?CACHE, OldestKey);
+            OldestRank = ets:first(Cache#cache.ranks),
+            [{OldestRank, OldestKey}] = ets:take(Cache#cache.ranks, OldestRank),
+            ets:delete(Cache#cache.cache, OldestKey);
         _ ->
             ok
     end,
     %% Insert the new element into the cache.
     NextRank = next_rank(),
-    ets:insert(?CACHE, {Key, NextRank, Value}),
-    ets:insert(?RANKS, {NextRank, Key}),
+    ets:insert(Cache#cache.cache, {Key, NextRank, Value}),
+    ets:insert(Cache#cache.ranks, {NextRank, Key}),
     ok.
-
-capacity() ->
-    application:get_env(ets_lru, capacity, 10_000).
 
 next_rank() ->
     erlang:unique_integer([monotonic]).
