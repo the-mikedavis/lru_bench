@@ -143,7 +143,8 @@ defmodule LruBench do
         {"X-Large", 10_000},
         {"XX-Large", 100_000}
       ],
-      time: 10
+      time: 5,
+      parallel: 4
     ]
   end
 
