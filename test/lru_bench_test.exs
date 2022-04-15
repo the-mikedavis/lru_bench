@@ -42,4 +42,25 @@ defmodule LruBenchTest do
     # evicted because 2 was more recently accessed
     assert :ets_lru.get(cache, 3, :error) == :error
   end
+
+  test "gen_server_gb_tree_lru correctness" do
+    {:ok, cache} = :gen_server_gb_tree_lru.start_link(capacity: 2)
+
+    :gen_server_gb_tree_lru.put(cache, 1, 1)
+    assert :gen_server_gb_tree_lru.get(cache, 1, :error) == 1
+    :gen_server_gb_tree_lru.put(cache, 2, 2)
+    :gen_server_gb_tree_lru.put(cache, 3, 3)
+    assert :gen_server_gb_tree_lru.get(cache, 2, :error) == 2
+    assert :gen_server_gb_tree_lru.get(cache, 3, :error) == 3
+
+    # evicted
+    assert :gen_server_gb_tree_lru.get(cache, 1, :error) == :error
+
+    assert :gen_server_gb_tree_lru.get(cache, 2, :error) == 2
+    :gen_server_gb_tree_lru.put(cache, 4, 4)
+    assert :gen_server_gb_tree_lru.get(cache, 4, :error) == 4
+
+    # evicted because 2 was more recently accessed
+    assert :gen_server_gb_tree_lru.get(cache, 3, :error) == :error
+  end
 end
