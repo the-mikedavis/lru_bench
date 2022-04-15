@@ -1,7 +1,7 @@
 %% @doc A Least-Recently Used (LRU) cache server
 %%
 %% This one is implemented as a gen_server which uses `ets' for all data.
--module(gen_server_lru).
+-module(gen_server_ets_lru).
 
 -behaviour(gen_server).
 
@@ -41,7 +41,7 @@ put(Cache, Key, Value) ->
 %% If the `capacity' option is not set, it will be fetched using
 %%
 %% ```
-%% application:get_env(gen_server_lru, capacity, 10_000).
+%% application:get_env(gen_server_ets_lru, capacity, 10_000).
 %% '''
 start_link(Opts) ->
     gen:start(gen_server, link, ?MODULE, Opts, []).
@@ -51,7 +51,7 @@ init(Opts) ->
     Capacity =
         case proplists:get_value(capacity, Opts) of
             undefined ->
-                application:get_env(gen_server_lru, capacity, 10_000);
+                application:get_env(gen_server_ets_lru, capacity, 10_000);
             Cap ->
                 Cap
         end,
@@ -59,9 +59,9 @@ init(Opts) ->
         none ->
             ignore;
         _ ->
-            RanksToKeys = ets:new(gen_server_lru_ranks_to_keys, [ordered_set, private]),
-            KeysToRanks = ets:new(gen_server_lru_keys_to_ranks, [set, private]),
-            KeysToValues = ets:new(gen_server_lru_keys_to_values, [set, private]),
+            RanksToKeys = ets:new(gen_server_ets_lru_ranks_to_keys, [ordered_set, private]),
+            KeysToRanks = ets:new(gen_server_ets_lru_keys_to_ranks, [set, private]),
+            KeysToValues = ets:new(gen_server_ets_lru_keys_to_values, [set, private]),
             {ok, #state{capacity = Capacity,
                         ranks_to_keys = RanksToKeys,
                         keys_to_ranks = KeysToRanks,
